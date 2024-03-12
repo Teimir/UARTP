@@ -31,8 +31,21 @@ execute (00)
 fetch A (01)
 fetch operand_addr (10)
 fetch operand (11)
+
+особенность выполнения
+КА автомат содержит 4 состояния
+00 выполнение
+01 загрузка А по PC
+10 загрука адреса операнда
+11 загрузка адреса операнда и А по PC
+
+начало работы с состояния execute и PC = 0
+reset устанавливает текущее состояние как начало работы
+
+остановка тактов и отключение провода write позволяет работать с памятью, иначе ядро будет ожидать что памяь полностью ему принадлежит
 */
-assign write = ~|state & PC_R[word_width - 1];
+assign write = ~|state & PC_R[word_width - 1];	//если у нас состояние позволяет загрузку (то есть в execute state)
+//провода АЛУ
 wire [word_width - 1:0][7:0] R = {
 	A + operand,
 	A - operand,
@@ -43,6 +56,7 @@ wire [word_width - 1:0][7:0] R = {
 	A >> 1,
 	A << 1
 };
+//ZF АЛУ
 wire [7:0] EXPECTED_ZF = {
 	(A + operand)	== 0,
 	(A - operand)	== 0,
@@ -53,8 +67,7 @@ wire [7:0] EXPECTED_ZF = {
 	(A >> 1)== 0,
 	(A << 1)== 0
 };
-
-
+//CF АЛУ
 wire [7:0] EXPECTED_CF = {
 	(A + operand) > 2 ** word_width - 1,
 	(A - operand) < 0,
@@ -65,8 +78,10 @@ wire [7:0] EXPECTED_CF = {
 	1'b0,
 	1'b0
 };
+//вспомогательные провода A_p, A_m для нахождения изменения старшего бита в результате сложения/вычитания
 wire [word_width - 1:0] A_p = A + operand;
 wire [word_width - 1:0] A_m = A - operand;
+//OF АЛУ
 wire [7:0] EXPECTED_OF = {
 	A[word_width - 1] ^ A_p[word_width - 1],
 	A[word_width - 1] ^ A_m[word_width - 1],
@@ -77,6 +92,7 @@ wire [7:0] EXPECTED_OF = {
 	1'b0,
 	1'b0
 };
+//КА основанный на регистре state
 always @(posedge clk) begin
 	if (reset) begin
 		//RESET
@@ -92,6 +108,7 @@ always @(posedge clk) begin
 			A <= operand;
 		end
 		if (|state) begin
+			//если у нас загрузка, то перевести состояние в выполнение, у нас не может быть более 1 загрузки подряд
 			state <= '0;
 			PC_ADRR <= PC_ADRR + 1;
 		end else begin
