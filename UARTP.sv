@@ -1,6 +1,5 @@
 module UARTP(
 	input clk,
-	input btn,
 	output led,
 	output led2,
 	output led3,
@@ -18,6 +17,13 @@ wire [7:0]data_rx; //Данные с рх
 (* keep="true" *)
 reg [3:0] u_mode = 4'd1;
 
+
+wire write2;
+wire [31:0] operand;
+wire [4:0] operand_addr;
+wire [31:0] PC_R;
+wire [4:0]  PC_ADRR;
+wire reset;
 
 //Параметры конечного автомата
 localparam wait_data = 2'b00; 
@@ -81,6 +87,32 @@ RX
     .data      (data_rx),
     .data_valid(data_rx_valid),
 	 .mode(u_mode)
+);
+
+
+core
+#(
+	.word_width(32)
+) core_inst(
+	.write(write2),
+	.clk(clk),
+	.operand(operand),
+	.operand_addr(operand_addr),
+	.reset(reset),
+	.PC_R(PC_R),
+	.PC_ADRR(PC_ADRR)
+);
+
+memory
+#(
+	.word_width(32)
+) mem_inst(
+	.write(write2),
+	.clk(clk),
+	.operand(operand),
+	.operand_addr(operand_addr),
+	.PC_R(PC_R),
+	.PC_ADRR(PC_ADRR)
 );
 
 //Вывод состояния на диоды
