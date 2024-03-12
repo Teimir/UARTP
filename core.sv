@@ -53,11 +53,11 @@ wire [7:0] EXPECTED_ZF = {
 	(A >> 1)== 0,
 	(A << 1)== 0
 };
-wire EC_1 = (A - operand) < 0;
-wire EC_2 = (A + operand) > 2 ** word_width - 1;
+
+
 wire [7:0] EXPECTED_CF = {
-	EC_2,
-	EC_1,
+	(A + operand) > 2 ** word_width - 1,
+	(A - operand) < 0,
 	1'b0,
 	1'b0,
 	1'b0,
@@ -67,11 +67,9 @@ wire [7:0] EXPECTED_CF = {
 };
 wire [word_width - 1:0] A_p = A + operand;
 wire [word_width - 1:0] A_m = A - operand;
-wire EO_1 = A[word_width - 1] ^ A_p[word_width - 1];
-wire EO_2 = A[word_width - 1] ^ A_m[word_width - 1];
 wire [7:0] EXPECTED_OF = {
-	EO_1,
-	EO_2,
+	A[word_width - 1] ^ A_p[word_width - 1],
+	A[word_width - 1] ^ A_m[word_width - 1],
 	1'b0,
 	1'b0,
 	1'b0,
