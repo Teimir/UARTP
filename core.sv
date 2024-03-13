@@ -117,7 +117,7 @@ always @(posedge clk) begin
 				state <= PC_R[1:0];
 				PC_ADRR <= PC_ADRR + 1;
 			end else if (PC_R[word_width - 2:word_width - 3] == 1) begin //calc
-				A <= R[PC_R[1:0]];
+				A <= R[PC_R[2:0]];
 				flags <= {EXPECTED_CF[PC_R[1:0]], EXPECTED_OF[PC_R[1:0]], EXPECTED_ZF[PC_R[1:0]], 1'b1};
 				PC_ADRR <= PC_ADRR + 1;
 			end else if (flags[PC_R[1:0]]) begin	//jump
