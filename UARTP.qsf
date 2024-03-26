@@ -67,8 +67,8 @@ set_location_assignment PIN_91 -to clk
 set_location_assignment PIN_105 -to led
 set_location_assignment PIN_104 -to led2
 set_location_assignment PIN_103 -to led3
-set_location_assignment PIN_31 -to rx
-set_location_assignment PIN_30 -to tx
+set_location_assignment PIN_84 -to rx
+set_location_assignment PIN_83 -to tx
 set_global_assignment -name SYSTEMVERILOG_FILE output_files/CORE.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mem.sv
 set_global_assignment -name SYSTEMVERILOG_FILE core.sv

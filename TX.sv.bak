@@ -52,8 +52,7 @@ assign tx_line = (state != write) ? 1 : data[bit_cnt];
 assign len_bit = (mode == 4'd0) ? 32'd10417: //4800
 					  (mode == 4'd1) ? 32'd5208 : //9600
 					  (mode == 4'd2) ? 32'd434   : //115200
-					  //(mode == 4'd3) ? 32'd98    : //512000
-					  (mode == 4'd3) ? 32'd195    : //256000
+					  (mode == 4'd3) ? 32'd98    : //512000
 					  32'd5208; //9600 Default
 
 endmodule
