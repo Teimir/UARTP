@@ -18,6 +18,7 @@ wire data_rx_valid; //Сигнал, что получение завершено
 wire [7:0]data_rx; //Данные с рх
 (* keep="true" *)
 reg [3:0] u_mode = 4'd1;
+reg [2:0] r = 3'b111;
 
 
 wire write2;
@@ -66,6 +67,11 @@ always @(posedge clk) begin
 end
 
 
+
+always @(posedge clk) begin
+	r <= {r, rx};
+end
+
 //Подключение модуля ТХ
 TX 
 #(
@@ -85,7 +91,7 @@ RX
 #(    
     .CLK_FREQ  (50000000)
 )rx_inst(
-    .rx_line   (rx),
+    .rx_line   (r[2]),
     .clk       (clk),
     .data      (data_rx),
     .data_valid(data_rx_valid),
