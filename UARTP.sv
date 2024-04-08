@@ -1,8 +1,10 @@
 module UARTP(
 	input clk,
+	input btn,
 	output led,
 	output led2,
 	output led3,
+	output led4,
 	output tx,
 	input rx
 );
@@ -26,15 +28,16 @@ wire [4:0]  PC_ADRR;
 wire reset;
 
 //Параметры конечного автомата
-localparam wait_data = 2'b00; 
-localparam write = 2'b01;
+localparam wait_data = 0; 
+localparam write = 1;
 
 reg sett = 0;
 
 //Регистр конечного автомата
-reg [1:0] state = wait_data; 
+reg state = wait_data; 
 
 always @(posedge clk) begin
+	if(btn == 0) u_mode <= 4'd0;
 	case(state) //Конечный автомат
 		wait_data: begin //Описание состояния ожидания
 			if (data_rx_valid) begin //Если данные получены - переносим в буфер и отправляем
@@ -116,7 +119,8 @@ memory
 );
 
 //Вывод состояния на диоды
-assign led = ~state[0];
-assign led2 = ~u_mode;
-assign led3 = ~sett;
+assign led = ~state;
+assign led2 = ~sett;
+assign led3 = ~u_mode[0];
+assign led4 = ~u_mode[1];
 endmodule

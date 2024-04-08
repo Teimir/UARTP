@@ -32,8 +32,8 @@ always @(posedge clk) begin
     case (state)
         start: begin
             data_valid <= 0;
-            if (rx_line == 0 && prev_ss == 1) clock_cnt <= 32'd1;
             if (clock_cnt != 32'd0) clock_cnt <= clock_cnt + 32'd1;
+				else if (rx_line == 0 && prev_ss == 1) clock_cnt <= 32'd1;
             if (clock_cnt == half_len_bit) begin
                 state <= read;
                 clock_cnt <= 32'd0;
