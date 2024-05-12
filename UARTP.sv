@@ -11,7 +11,7 @@ module UARTP(
 
 
 // Регистры
-reg [7:0] data = 8'haa; //Данные
+wire [7:0] data; //Данные
 reg  data_tx_valid = '0; //Сигнал к отправке на ТХ
 wire data_tx_ready; //Сигнал, что готовы к отправке
 wire data_rx_valid; //Сигнал, что получение завершено
@@ -32,38 +32,32 @@ wire reset;
 localparam wait_data = 0; 
 localparam write = 1;
 
+
+
 reg sett = 0;
 
 //Регистр конечного автомата
 reg state = wait_data; 
 
 always @(posedge clk) begin
-	if(btn == 0) u_mode <= 4'd0;
-	case(state) //Конечный автомат
-		wait_data: begin //Описание состояния ожидания
-			if (data_rx_valid) begin //Если данные получены - переносим в буфер и отправляем
-				data <= data_rx;
-				if (data_rx == 8'hff) sett <= '1;
-				else if (sett && data_rx[7:4] == 4'hf) begin
-					u_mode <= data_rx[3:0];
-					sett <= '0;
-					end
-				else sett <= '0;
-				state <= write;
-			end
+	if(btn == 0) u_mode <= 4'd1;
+	if (data_rx_valid) begin //Если данные получены - переносим в буфер и отправляем
+		if (data_rx == 8'hff) sett <= '1;
+		else if (sett && data_rx[7:4] == 4'hf) begin
+			u_mode <= data_rx[3:0];
+			sett <= '0;
 		end
-		write: begin //Описание состояния отправки
-			if (data_tx_ready && data_tx_valid) begin //Если данные готовы к отправке и корректны, сбрасываем корректность и переходим к ожиданию
-					data_tx_valid <= 0;
-					state <= wait_data;
-			end
-			else begin
-				if (data_tx_ready) begin //Готовы к отправке
-				data_tx_valid <= 1;
-				end
-			end
+	else sett <= '0;
+	end
+	if (data_tx_ready && data_tx_valid) begin //Если данные готовы к отправке и корректны, сбрасываем корректность и переходим к ожиданию
+		data_tx_valid <= 0;
+	end
+	else begin
+		if (data_tx_ready) begin //Готовы к отправке
+			data_tx_valid <= 1;
 		end
-	endcase
+	end
+	
 end
 
 
@@ -71,6 +65,21 @@ end
 always @(posedge clk) begin
 	r <= {r, rx};
 end
+
+
+fifo fifo_inst(
+  .clk(clk),        // тактовый сигнал
+  .reset(btn == 0),      // сигнал сброса
+  .write_enable(data_rx_valid),  // сигнал разрешения записи
+  .read_enable(data_tx_ready),   // сигнал разрешения чтения
+  .data_in(data_rx),       // входные данные
+  .data_out(data),     // выходные данные
+
+  .empty(~led),       // сигнал пустого буфера
+  .full(~led2)         // сигнал заполненного буфера
+);
+
+
 
 //Подключение модуля ТХ
 TX 
@@ -99,34 +108,7 @@ RX
 );
 
 
-core
-#(
-	.word_width(32)
-) core_inst(
-	.write(write2),
-	.clk(clk),
-	.operand(operand),
-	.operand_addr(operand_addr),
-	.reset(reset),
-	.PC_R(PC_R),
-	.PC_ADRR(PC_ADRR)
-);
-
-memory
-#(
-	.word_width(32)
-) mem_inst(
-	.write(write2),
-	.clk(clk),
-	.operand(operand),
-	.operand_addr(operand_addr),
-	.PC_R(PC_R),
-	.PC_ADRR(PC_ADRR)
-);
-
 //Вывод состояния на диоды
-assign led = ~state;
-assign led2 = ~sett;
 assign led3 = ~u_mode[0];
 assign led4 = ~u_mode[1];
 endmodule
