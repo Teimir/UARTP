@@ -55,7 +55,7 @@ always @(posedge clk) begin
             else clock_cnt <= clock_cnt + 32'd1;
         end
         stop: begin
-            if (clock_cnt == len_bit && rx_line == 1) begin
+            if (clock_cnt >= len_bit[31:1] && rx_line == 1) begin
                 clock_cnt <= 32'd0;
                 state <= start;
                 data_valid <= 1;
