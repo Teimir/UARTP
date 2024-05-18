@@ -17,7 +17,7 @@ localparam stop = 2'b10;
 
 wire [31:0] len_bit;
 wire [31:0] half_len_bit;
-
+reg [2:0] r = 3'b111;
 
 
 reg [1:0] state = 2'b0;
@@ -27,13 +27,18 @@ reg prev_ss = 0;
 
 reg [7:0] data_r = 'd0;
 
+
 always @(posedge clk) begin
-    prev_ss <= rx_line;
+	r <= {r, rx_line};
+end
+
+always @(posedge clk) begin
+    prev_ss <= r[2];
     case (state)
         start: begin
             data_valid <= 0;
             if (clock_cnt != 32'd0) clock_cnt <= clock_cnt + 32'd1;
-				else if (rx_line == 0 && prev_ss == 1) clock_cnt <= 32'd1;
+				else if (r[2] == 0 && prev_ss == 1) clock_cnt <= 32'd1;
             if (clock_cnt == half_len_bit) begin
                 state <= read;
                 clock_cnt <= 32'd0;
@@ -43,7 +48,7 @@ always @(posedge clk) begin
         read: begin
 
             if (clock_cnt == len_bit) begin
-                data_r <= {rx_line, data_r[7:1]};
+                data_r <= {r[2], data_r[7:1]};
                 bit_cnt <= bit_cnt + 4'd1;
                 
                 clock_cnt <= 32'd0;                
@@ -55,7 +60,7 @@ always @(posedge clk) begin
             else clock_cnt <= clock_cnt + 32'd1;
         end
         stop: begin
-            if (clock_cnt >= len_bit[31:1] && rx_line == 1) begin
+            if (clock_cnt >= len_bit[31:1] && r[2] == 1) begin
                 clock_cnt <= 32'd0;
                 state <= start;
                 data_valid <= 1;
