@@ -73,5 +73,7 @@ Fifo_UART TX_FIFO(
 
 always @(posedge clk) begin
 	if (!empty_fifo_tx && data_tx_ready) data_led[7:0] <= data[7:0];
+	data_led[8] <= ~tx;
+	data_led[9] <= ~rx;
 end
 endmodule
