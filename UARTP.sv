@@ -71,6 +71,11 @@ Fifo_UART TX_FIFO(
 	.usedw	()
 );
 
+
+CORE u0(
+	.clk(clk)
+);
+
 always @(posedge clk) begin
 	if (!empty_fifo_tx && data_tx_ready) data_led[7:0] <= data[7:0];
 	data_led[8] <= ~tx;
