@@ -42,7 +42,7 @@ set_global_assignment -name DEVICE EP4CE6E22C8
 set_global_assignment -name TOP_LEVEL_ENTITY UARTP
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 22.1STD.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "23:04:35  MARCH 09, 2024"
-set_global_assignment -name LAST_QUARTUS_VERSION "22.1std.1 Lite Edition"
+set_global_assignment -name LAST_QUARTUS_VERSION "22.1std.2 Lite Edition"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
@@ -55,9 +55,6 @@ set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_
 set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_symbol
 set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_signal_integrity
 set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_boundary_scan
-set_global_assignment -name SYSTEMVERILOG_FILE UARTP.sv
-set_global_assignment -name SYSTEMVERILOG_FILE TX.sv
-set_global_assignment -name SYSTEMVERILOG_FILE RX.sv
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
@@ -69,7 +66,6 @@ set_location_assignment PIN_103 -to led2
 set_location_assignment PIN_104 -to led3
 set_location_assignment PIN_31 -to rx
 set_location_assignment PIN_30 -to tx
-set_global_assignment -name SIGNALTAP_FILE output_files/stp1.stp
 set_location_assignment PIN_76 -to btn
 set_location_assignment PIN_105 -to led4
 set_global_assignment -name ENABLE_OCT_DONE OFF
@@ -83,7 +79,6 @@ set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -
 set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to clk -section_id auto_signaltap_0
@@ -123,7 +118,6 @@ set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[15] -
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[21] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=1024" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=512" -section_id auto_signaltap_0
-set_global_assignment -name QIP_FILE RAM.qip
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[5] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[6] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[10] -to auto_signaltap_0|gnd -section_id auto_signaltap_0
@@ -193,7 +187,6 @@ set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[16] -
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[17] -to auto_signaltap_0|gnd -section_id auto_signaltap_0
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[25] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[31] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
-set_global_assignment -name QIP_FILE Fifo_UART.qip
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to data_led[9]
 set_location_assignment PIN_119 -to data_led[0]
 set_location_assignment PIN_121 -to data_led[1]
@@ -220,8 +213,16 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to data_led[2]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to data_led[3]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to data_led
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to seven
+set_global_assignment -name SYSTEMVERILOG_FILE RF.sv
+set_global_assignment -name SYSTEMVERILOG_FILE UARTP.sv
+set_global_assignment -name SYSTEMVERILOG_FILE TX.sv
+set_global_assignment -name SYSTEMVERILOG_FILE RX.sv
+set_global_assignment -name SIGNALTAP_FILE output_files/stp1.stp
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name QIP_FILE RAM.qip
+set_global_assignment -name QIP_FILE Fifo_UART.qip
 set_global_assignment -name SYSTEMVERILOG_FILE CORE.sv
 set_global_assignment -name QIP_FILE MEMORY.qip
 set_global_assignment -name SYSTEMVERILOG_FILE ALU.sv
-set_global_assignment -name SLD_FILE db/stp1_auto_stripped.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name SLD_FILE db/stp1_auto_stripped.stp

@@ -3,55 +3,62 @@ module CORE(
 );
 
 
-reg [31:0] REGS [32];
+//reg [31:0] REGS [32];
 reg [31:0] INSTR = 32'd0;
-reg [2:0] STATE = 3'b000;
+enum reg [2:0] {FETCH, EXECUTE, MEMORY_INTERACTION, HALT} STATE = FETCH;
+enum bit [3:0] {NOP, CALC, MOV, MEM_ACT} EXEC_TYPE;
 
-reg ram_we = 0;
-reg ram_addr = 0;
-reg fetch_flg = 0;
+reg ram_we = '0;
 
-localparam fetch = 3'b000;
-localparam execute = 3'b001;
-localparam readmem = 3'b010;
-
-wire [31:0] ram_data_in;
 wire [31:0] ram_data_out;
-
-wire [3:0] alu_op;
-wire [31:0] alu_a;
-wire [31:0] alu_b;
-wire [31:0] alu_res;
-
-assign alu_op = INSTR[9:3];
-assign alu_a = REGS[INSTR[19:15]];
-assign alu_b = REGS[INSTR[24:20]];
-
+wire [31:0] PC;
+wire [31:0] PRE_PC = INSTR[2:0] == CALC ? PC + 1 : ALU_A;
+wire [3:0] ALU_OP = INSTR[9:3];
+wire [31:0] ALU_A;
+wire [31:0] ALU_B;
+wire [31:0] ALU_R;
 always @(posedge clk) begin
 	case(STATE)
-		fetch: begin
+		FETCH: begin
 			INSTR <= ram_data_out;
-			STATE <= execute;
+			STATE <= EXECUTE;
 		end
-		execute: begin
+		EXECUTE: begin
 			case (INSTR[2:0])
-				3'b01: REGS[INSTR[14:10]] <= alu_res;
-				3'b10: REGS[INSTR[14:10]] <= REGS[INSTR[19:15]];
+				NOP: begin
+					STATE <= FETCH;
+					INSTR[19:15] <= '1;	//переключаемся на PC
+				end
+				CALC: begin
+					STATE <= FETCH;
+					INSTR[19:15] <= '1;	//переключаемся на PC
+				end
+				MOV: begin
+					STATE <= FETCH;
+					INSTR[19:15] <= '1;	//переключаемся на PC
+				end
+				MEM_ACT: begin
+					STATE <= MEMORY_INTERACTION;
+				end
 			endcase
-			REGS[31] <= REGS[31] + 32'd1;
-			ram_addr <= REGS[31] + 32'd1;
 		end
-		readmem: begin
-			STATE <= fetch;
+		MEMORY_INTERACTION: begin
+			STATE <= FETCH;
+			ram_we <= '0;
+		end
+		HALT: begin
+			if (0) begin		//TODO: for future
+				STATE <= FETCH;
+			end
 		end
 	endcase
 end
 
 
 MEMORY RAM(
-	.address	(ram_addr),
-	.clock	(clk),
-	.data		(ram_data_in),
+	.address	(PRE_PC),
+	.clock		(clk),
+	.data		(ALU_B),
 	.wren		(ram_we),
 	.q			(ram_data_out)
 );
@@ -59,10 +66,23 @@ MEMORY RAM(
 ALU #(
 	.bit_width(32)
 ) ALUM(
-  .OP	(alu_op),
-  .A	(alu_a),
-  .B	(alu_b),
-  .R	(alu_res)
+  .OP	(ALU_OP),
+  .A	(ALU_A),
+  .B	(ALU_B),
+  .R	(ALU_R)
+);
+register_file #(.bit_width(32), .sel_width(5)) RF (
+	.clk(clk),
+	.sel_en(((STATE == EXECUTE) & (INSTR[2:0] == CALC) | (INSTR[2:0] == MOV)) | ram_we),
+	.pc_reset('0),
+	.sel_a(INSTR[19:15]),
+	.sel_b(INSTR[24:20]),
+	.sel_c(INSTR[14:10]),
+	.data_in(INSTR[2:0] == MEMORY_INTERACTION ? ram_data_out : ALU_R),
+	.data_in_pc(PRE_PC),
+	.data_out_a(ALU_A),
+	.data_out_b(ALU_B),
+	.data_out_pc(PC)
 );
 
 endmodule
