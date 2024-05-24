@@ -1,5 +1,4 @@
 enum bit[3:0] {
-  OP_CP,
   OP_ADD,
   OP_SUB,
   OP_NOT,
@@ -44,8 +43,7 @@ wire [bit_width - 1:0][7:0] RAW_R  = {
   AND,
   NOT,
   ~ADDER[bit_width - 1:0],
-  ADDER[bit_width - 1:0],
-  A
+  ADDER[bit_width - 1:0]
 };
 assign R = RAW_R[OP];
 endmodule
