@@ -58,6 +58,9 @@ always @(posedge clk) begin
 						ram_we <= ALU_OP[0];
 						STATE <= MEMORY_INTERACTION;
 					end
+					default: begin
+						STATE <= FETCH;
+					end
 				endcase
 				if ((INS_T != CALC && INS_T != CALC_CONST_B && INS_T != CALC_CONST_A) || (REG_A != PC)) RF[PC] <= RF[PC] + 12'd1;
 			end

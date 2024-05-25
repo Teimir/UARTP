@@ -1,6 +1,6 @@
 def generate_mif(width: int, depth: int, filename: str, data: list[int]):
 	f = open(filename + ".mif", "w")
-	f.write(f"-- Quartus Prime generated Memory Initialization File (.mif)\n\nWIDTH={width};\nDEPTH={depth};\n\n;ADDRESS_RADIX=UNS;\nDATA_RADIX=UNS;\n\nCONTENT BEGIN\n")
+	f.write(f"-- Quartus Prime generated Memory Initialization File (.mif)\n\nWIDTH={width};\nDEPTH={depth};\n\nADDRESS_RADIX=UNS;\nDATA_RADIX=UNS;\n\nCONTENT BEGIN\n")
 	while (len(data)):
 		if data[-1]:
 			break
@@ -25,6 +25,6 @@ def generate_mif(width: int, depth: int, filename: str, data: list[int]):
 	f.close()
 
 #tests
-#generate_mif(32, 4096, "test_mif", [0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7])
+generate_mif(32, 4096, "test_mif", [0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7])
 #generate_mif(32, 4096, "test_mif", [0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0])
 #generate_mif(32, 4096, "test_mif", [])
