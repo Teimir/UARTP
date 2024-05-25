@@ -85,7 +85,8 @@ ALU #(
   .OP	(ALU_OP),
   .A	(ALU_A),
   .B	(ALU_B),
-  .R	(ALU_R)
+  .R	(ALU_R),
+  .PC (RF[PC])
 );
 
 endmodule
