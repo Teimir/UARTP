@@ -1,99 +1,83 @@
 module CORE(
 	input clk
 );
+localparam PC = 5'd31;
 
+reg [31:0] RF [32];
+
+initial RF[PC] = 32'd0;
 
 reg [31:0] INSTR = 32'd0;
-//
-//
-//
-//
+reg ram_we = 0;
+
+
+
+wire [11:0] ram_addres = (STATE == EXECUTE && INS_T == MEM_ACT) ? RF[REG_B] : RF[PC];
+wire [31:0] ram_data_out;
+wire [31:0] ram_data_in = RF[REG_A];
 
 enum reg [2:0] {FETCH, EXECUTE, MEMORY_INTERACTION, HALT} STATE = FETCH;
-enum bit [3:0] {NOP, CALC, MOV, MEM_ACT} EXEC_TYPE;
-
-reg ram_we = '0;
-wire [31:0] ram_data_out;
-
-
-wire [31:0] PC;
-wire [31:0] PRE_PC = ((INSTR[2:0] == MOV) && (INSTR[19:15] == '1)) || ((STATE == EXECUTE) && (INSTR[2:0] == MEM_ACT)) ? ALU_A : PC + 1;
+enum bit [3:0] {NOP, CALC_CONST_A, CALC_CONST_B, CALC, MEM_ACT} EXEC_TYPE;
 
 
 wire [2:0] INS_T = INSTR[2:0];
 wire [3:0] ALU_OP = INSTR[6:3];
-wire [31:0] REG_A = INSTR[11:7];
-wire [31:0] REG_B = INSTR[16:12];
-wire [31:0] REG_C = INSTR[22:17];
+wire [5:0] REG_A = INSTR[11:7];
+wire [5:0] REG_B = INSTR[16:12];
+wire [5:0] REG_C = INSTR[22:17];
 wire [9:0] IMM_10 = INSTR[31:22];
 wire [14:0] IMM_15 = INSTR[31:17];
 wire [19:0] IMM_20 = INSTR[31:12];
 
-
-
-wire [31:0] ALU_A;
-wire [31:0] ALU_B;
-wire [31:0] ALU_R;
-
-
-
+wire [31:0] ALU_A = (INS_T == CALC_CONST_A) ? IMM_20 : RF[REG_B];
+wire [31:0] ALU_B = (INS_T == CALC_CONST_B) ? IMM_15 : RF[REG_C];
 
 always @(posedge clk) begin
-	case(STATE)
-		
-		// Получаем инструкцию из памяти (EXECUTE гарантирует, что данные корректны, устанавливая их)
-		FETCH: begin 
-			INSTR <= ram_data_out;
-			STATE <= EXECUTE;
-		end
-		
-		//Выполняем действия по данным инструкции
-		EXECUTE: begin
-			case (INSTR[2:0])
+		case(STATE)
+			FETCH: begin
+				INSTR <= ram_data_out;
+				STATE <= EXECUTE;
+			end
 			
-				NOP: begin //Ничего не делаем
-					STATE <= FETCH;
-				end
+			EXECUTE: begin
+				case(INS_T)
+					NOP: STATE <= FETCH;
+					CALC_CONST_A: begin
+						RF[REG_A] <= ALU_R;
+						STATE <= FETCH;
+					end
+					CALC_CONST_B: begin
+						RF[REG_A] <= ALU_R;
+						STATE <= FETCH;
+					end
+					CALC: begin
+						RF[REG_A] <= ALU_R;
+						STATE <= FETCH;
+					end
+					MEM_ACT: begin
+						ram_we <= ALU_OP[0];
+						STATE <= MEMORY_INTERACTION;
+					end
+				endcase
+				if ((INS_T != CALC && INS_T != CALC_CONST_B && INS_T != CALC_CONST_A) || (REG_A != PC)) RF[PC] <= RF[PC] + 12'd1;
+			end
 			
-				CALC: begin //data_in <= alu_R
-					STATE <= FETCH;
-				end
-				
-				MOV: begin
-					STATE <= FETCH;
-				end
-				
-				MEM_ACT: begin
-					ram_we <= ALU_OP[0];
-					STATE <= MEMORY_INTERACTION;
-				end
-				
-			endcase
-		end
-		
-		
-		MEMORY_INTERACTION: begin
-			STATE <= FETCH;
-			ram_we <= '0;
-		end
-		
-		
-		HALT: begin
-			if (0) begin		//TODO: for future
+			MEMORY_INTERACTION: begin
+				if (~ram_we) RF[REG_A] <= ram_data_out;
+				else ram_we <= 0;
 				STATE <= FETCH;
 			end
-		end
-	endcase
+		endcase
 end
 
-
 MEMORY RAM(
-	.address	(PRE_PC),
-	.clock		(clk),
-	.data		(ALU_B),
+	.address	(ram_addres),
+	.clock	(clk),
+	.data		(ram_data_in),
 	.wren		(ram_we),
 	.q			(ram_data_out)
 );
+
 
 ALU #(
 	.bit_width(32)
@@ -102,19 +86,6 @@ ALU #(
   .A	(ALU_A),
   .B	(ALU_B),
   .R	(ALU_R)
-);
-register_file #(.bit_width(32), .sel_width(5)) RF (
-	.clk				(clk),
-	.sel_en			(((STATE == EXECUTE) & (INSTR[2:0] == CALC) | (INSTR[2:0] == MOV)) | ram_we),
-	.pc_reset		('0),
-	.sel_a			(INSTR[19:15]),
-	.sel_b			(INSTR[24:20]),
-	.sel_c			(INSTR[14:10]),
-	.data_in			(STATE == MEMORY_INTERACTION ? ram_data_out : ALU_R),
-	.data_in_pc		(PRE_PC),
-	.data_out_a		(ALU_A),
-	.data_out_b		(ALU_B),
-	.data_out_pc	(PC)
 );
 
 endmodule

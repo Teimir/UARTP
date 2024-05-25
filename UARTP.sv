@@ -23,6 +23,9 @@ wire empty_fifo_tx; //Если пустой буффер отправки
 wire [7:0] fifo_data; //Данные между фифо
 wire [7:0]data_rx; //Данные с рх
 
+
+
+reg flag = 0;
 //Подключение модуля ТХ
 TX 
 #(
@@ -73,12 +76,13 @@ Fifo_UART TX_FIFO(
 
 
 CORE u0(
-	.clk(clk)
+	.clk(flag ? clk : '0)
 );
 
 always @(posedge clk) begin
+	if (fifo_data == 8'hff) flag <= 1;
 	if (!empty_fifo_tx && data_tx_ready) data_led[7:0] <= data[7:0];
-	data_led[8] <= ~tx;
-	data_led[9] <= ~rx;
+	data_led[8] <= flag;
+	data_led[9] <= rx;
 end
 endmodule
