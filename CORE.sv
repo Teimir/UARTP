@@ -10,14 +10,12 @@ wire [2:0]	INS_T	= INSTR[2:0];
 wire [3:0]	ALU_OP	= INSTR[6:3];
 wire [31:0]	REG_A	= INSTR[11:7];
 wire [31:0]	REG_B	= INSTR[16:12];
-wire [9:0]	IMM_10	= INSTR[31:22];
-wire [14:0]	IMM_15	= INSTR[31:17];
 wire [19:0]	IMM_20	= INSTR[31:12];
 wire [31:0] RF_A;
-wire [31:0] ALU_A = (INS_T == GET_PC) ? PC : (INS_T == CALC_CONST_A) ? 32'b0 /*IMM*/ : RF_A;
+wire [31:0] ALU_A = (INS_T == GET_PC) ? PC : (INS_T == CALC_CONST_A) ? IMM_20 : RF_A;
 wire [31:0] ALU_B;
 wire [31:0] ALU_R;
-wire [31:0] PRE_PC = (INS_T == JMP) ? ALU_A : PC + 1;
+wire [31:0] PRE_PC = (INS_T == JMP) && |ALU_B ? ALU_A : PC + 1;
 wire [31:0]	ADDR = (INS_T == MEM_ACT) ? ALU_A : PC + 1;
 
 reg ram_we = '0;
