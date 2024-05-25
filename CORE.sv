@@ -2,6 +2,10 @@ module CORE(
 	input clk
 );
 localparam PC = 5'd31;
+localparam FETCH = 3'd0;
+localparam EXECUTE = 3'd1;
+localparam MEMORY_INTERACTION = 3'd2;
+localparam HALT = 3'd3;
 
 reg [31:0] RF [32];
 
@@ -12,11 +16,11 @@ reg ram_we = 0;
 
 
 
-wire [11:0] ram_addres = (STATE == EXECUTE && INS_T == MEM_ACT) ? RF[REG_B] : RF[PC];
+wire [11:0] ram_addres = (STATE == EXECUTE && INS_T == MEM_ACT) ? RF[REG_B] : (STATE == EXECUTE) ? RF[PC] : 32'd0;
 wire [31:0] ram_data_out;
 wire [31:0] ram_data_in = RF[REG_A];
 
-enum reg [2:0] {FETCH, EXECUTE, MEMORY_INTERACTION, HALT} STATE = FETCH;
+reg [2:0] STATE = FETCH;
 enum bit [3:0] {NOP, CALC_CONST_A, CALC_CONST_B, CALC, MEM_ACT} EXEC_TYPE;
 
 
@@ -56,13 +60,15 @@ always @(posedge clk) begin
 					end
 					MEM_ACT: begin
 						ram_we <= ALU_OP[0];
+						//RF[PC] <= RF[PC] - 12'd1;
 						STATE <= MEMORY_INTERACTION;
 					end
 					default: begin
 						STATE <= FETCH;
 					end
 				endcase
-				if ((INS_T != CALC && INS_T != CALC_CONST_B && INS_T != CALC_CONST_A) || (REG_A != PC)) RF[PC] <= RF[PC] + 12'd1;
+				if (!(STATE == EXECUTE && INS_T == MEM_ACT)) RF[PC] <= RF[PC] + 12'd1;
+				STATE <= FETCH;
 			end
 			
 			MEMORY_INTERACTION: begin
