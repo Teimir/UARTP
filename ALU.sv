@@ -28,6 +28,8 @@ wire [bit_width - 1:0] OR = A | B;
 wire [bit_width - 1:0] XOR = OR & ~AND;
 //арифетические операторы
 wire [bit_width:0] ADDER = (OP[0] ? NOT : A) + B;
+//wire [bit_width:0] ADDER = A + B;
+
 //сдвиги логические
 wire [bit_width - 1:0] L_SHIFT = A << 1;
 wire [bit_width - 1:0] R_SHIFT = A >> 1;
@@ -39,21 +41,21 @@ wire [bit_width - 1:0] CMP_LESS = {bit_width{A < B}};
 wire [bit_width - 1:0] OUT_T = (A == '1) ? B : PC + 32'd1;
 wire [bit_width - 1:0] OUT_F = (A == '0) ? B : PC + 32'd1;
 //вывод результата
-wire [bit_width - 1:0][7:0] RAW_R  = {
-  OUT_F,
-  OUT_T,
-  CMP_LESS,
-  CMP_EQUAL,
-  CMP_GREATER,
-  L_SHIFT,
-  R_SHIFT,
-  XOR,
-  OR,
-  AND,
-  NOT,
-  ~ADDER[bit_width - 1:0],
-  ADDER[bit_width - 1:0],
-  A
-};
+wire [bit_width - 1:0] RAW_R [13:0];
+assign RAW_R[13] = OUT_F; 
+assign RAW_R[12] = OUT_T; 
+assign RAW_R[11] = CMP_LESS; 
+assign RAW_R[10] = CMP_EQUAL; 
+assign RAW_R[9] = CMP_GREATER;
+assign RAW_R[8] = L_SHIFT;
+assign RAW_R[7] = R_SHIFT;
+assign RAW_R[6] = XOR;
+assign RAW_R[5] = OR;
+assign RAW_R[4] = AND;
+assign RAW_R[3] = NOT; 
+assign RAW_R[2] = ~ADDER[bit_width - 1:0]; 
+assign RAW_R[1] = ADDER[bit_width - 1:0];
+assign RAW_R[0] = A; 
+
 assign R = RAW_R[OP];
 endmodule

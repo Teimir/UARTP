@@ -23,7 +23,7 @@ wire empty_fifo_tx; //Если пустой буффер отправки
 wire [7:0] fifo_data; //Данные между фифо
 wire [7:0]data_rx; //Данные с рх
 
-
+wire [2:0] ins;
 
 reg flag = 0;
 //Подключение модуля ТХ
@@ -76,7 +76,8 @@ Fifo_UART TX_FIFO(
 
 
 CORE u0(
-	.clk(flag ? clk : '0)
+	.clk(flag ? clk : '0),
+	.ins(ins)
 );
 
 always @(posedge clk) begin

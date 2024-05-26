@@ -25,6 +25,6 @@ def generate_mif(width: int, depth: int, filename: str, data: list[int]):
 	f.close()
 
 #tests
-generate_mif(32, 4096, "test_mif", [0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7])
+generate_mif(32, 4096, "Mif3", [127105, 140, 0])
 #generate_mif(32, 4096, "test_mif", [0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0])
 #generate_mif(32, 4096, "test_mif", [])
