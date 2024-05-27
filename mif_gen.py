@@ -34,7 +34,7 @@ generate_mif(32, 4096, "Mif3", [127105, 140, 0])
 
 #ALU test code
 generate_mif(32, 4096, "alu_test", [
-	(43 << 12) | 1,										#reg[0] = literal(43 - is end of .text)
+	(44 << 12) | 1,										#reg[0] = literal(43 - is end of .text)
 	(10 << 12) | (1 << 7) | 1,							#reg[1] = 10
 	(1 << 12) | (2 << 7) | 3,							#reg[2] = reg[1]
 	(2 << 7) | (1 << 3) | 4,							#write reg[2] to ram as = operation check
@@ -76,5 +76,6 @@ generate_mif(32, 4096, "alu_test", [
 	(2 << 7) | (1 << 3) | 4,							#write reg[3] to ram as true operation check
 	(1 << 17) | (1 << 3) | 3,							#reg[0] = reg[0] + literal
 	(2 << 17) | (1 << 12) | (3 << 7) | (13 << 3) | 3,	#reg[3] = |reg[1] ? reg[2] : PC + 1
-	(2 << 7) | (1 << 3) | 4								#write reg[3] to ram as false operation check
+	(2 << 7) | (1 << 3) | 4,							#write reg[3] to ram as false operation check
+	(31 << 7) | 1										#reg[PC] = 0
 ])
