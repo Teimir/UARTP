@@ -9,5 +9,5 @@ DATA_RADIX=UNS;
 CONTENT BEGIN
 	0:	127105;
 	1:	140;
-	[1..4095]:	0;
+	[2..4095]:	0;
 END;

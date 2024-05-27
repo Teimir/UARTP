@@ -14,6 +14,7 @@ def generate_mif(width: int, depth: int, filename: str, data: list[int]):
 				f.write(f"\t{s}:\t{data[s]};\n")
 				if (e == len(data) - 1):
 					f.write(f"\t{e}:\t{data[e]};\n")
+					e += 1
 			else:
 				f.write(f"\t[{s}..{e - 1}]:\t{data[s]};\n")
 			s = e
