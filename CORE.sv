@@ -17,7 +17,7 @@ reg ram_we = 0;
 
 assign ins = INS_T;
 
-wire [11:0] ram_addres = ((STATE == EXECUTE || STATE == MEMORY_INTERACTION) && INS_T == MEM_ACT) ? RF[REG_B] : RF[PC];
+wire [12:0] ram_addres = ((STATE == EXECUTE || STATE == MEMORY_INTERACTION) && INS_T == MEM_ACT) ? RF[REG_B] : RF[PC];
 wire [31:0] ram_data_out;
 wire [31:0] ram_data_in = RF[REG_A];
 
