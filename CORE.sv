@@ -22,7 +22,7 @@ wire [31:0] ram_data_out;
 wire [31:0] ram_data_in = RF[REG_A];
 
 reg [2:0] STATE = FETCH;
-enum bit [3:0] {NOP, CALC_CONST_A, CALC_CONST_B, CALC, MEM_ACT} EXEC_TYPE;
+enum bit [3:0] {NOP, CALC_CONST_A, CALC_CONST_B, CALC, MEM_ACT, HLT} EXEC_TYPE;
 
 
 wire [2:0] INS_T;
@@ -72,6 +72,9 @@ always @(posedge clk) begin
 						//RF[PC] <= RF[PC] - 12'd1;
 						STATE <= MEMORY_INTERACTION;
 					end
+					HLT: begin
+					STATE <= HALT;
+					end
 					default: begin
 						STATE <= PFETCH;
 					end
@@ -83,6 +86,11 @@ always @(posedge clk) begin
 				else ram_we <= 0;
 				STATE <= PFETCH;
 			end
+			
+			HALT: begin
+				STATE <= HALT;
+			end
+			
 		endcase
 end
 

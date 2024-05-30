@@ -27,7 +27,7 @@ wire [bit_width - 1:0] AND = A & B;
 wire [bit_width - 1:0] OR = A | B;
 wire [bit_width - 1:0] XOR = OR & ~AND;
 //арифетические операторы
-wire [bit_width:0] ADDER = (OP[0] ? NOT : A) + B;
+wire [bit_width:0] ADDER = (OP[0] ? A : NOT) + B;
 //wire [bit_width:0] ADDER = A + B;
 
 //сдвиги логические
@@ -38,8 +38,8 @@ wire [bit_width - 1:0] CMP_GREATER = {bit_width{A > B}};
 wire [bit_width - 1:0] CMP_EQUAL = {bit_width{A == B}};
 wire [bit_width - 1:0] CMP_LESS = {bit_width{A < B}};
 
-wire [bit_width - 1:0] OUT_T = (A == '1) ? B : PC + 32'd1;
-wire [bit_width - 1:0] OUT_F = (A == '0) ? B : PC + 32'd1;
+wire [bit_width - 1:0] OUT_T = (A == '1) ? B : PC;
+wire [bit_width - 1:0] OUT_F = (A == '0) ? B : PC;
 //вывод результата
 wire [bit_width - 1:0] RAW_R [13:0];
 assign RAW_R[13] = OUT_F; 
