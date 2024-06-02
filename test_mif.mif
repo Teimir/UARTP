@@ -3,7 +3,7 @@
 WIDTH=32;
 DEPTH=4096;
 
-;ADDRESS_RADIX=UNS;
+ADDRESS_RADIX=UNS;
 DATA_RADIX=UNS;
 
 CONTENT BEGIN
@@ -14,5 +14,13 @@ CONTENT BEGIN
 	4:	4;
 	5:	5;
 	6:	6;
-	[7..4095]:	0;
+	7:	7;
+	[8..16]:	0;
+	17:	1;
+	18:	2;
+	19:	3;
+	20:	4;
+	21:	5;
+	22:	6;
+	[23..4095]:	0;
 END;

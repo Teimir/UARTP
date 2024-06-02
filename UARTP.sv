@@ -110,7 +110,7 @@ CORE u0(
 );
 
 always @(posedge clk) begin
-	if (fifo_data == 8'hff) flag <= 1;
+	if (data_rx == 8'hff) flag <= 1;
 	if (!empty_fifo_tx && data_tx_ready) data_led[7:0] <= data[7:0];
 	data_led[8] <= flag;
 	data_led[9] <= rx;
