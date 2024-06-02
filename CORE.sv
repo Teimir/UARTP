@@ -1,6 +1,13 @@
 module CORE(
-	input clk,
-	output [2:0] ins
+	input wire clk,
+	output wire [31:0] data_to_mem,
+	//RAM
+	output wire [12:0] ram_addres,
+	output wire RAM_WE,
+	input wire [31:0] ram_data_out,
+	//UART
+	input wire [31:0] uart_data_out,
+	output wire [1:0] UART_OP
 );
 localparam PC = 5'd31;
 localparam FETCH = 3'd0;
@@ -13,16 +20,15 @@ reg [31:0] RF [32];
 initial RF[PC] = 32'd0;
 
 reg [31:0] INSTR = 32'd0;
-reg ram_we = 0;
 
 assign ins = INS_T;
 
-wire [12:0] ram_addres = ((STATE == EXECUTE || STATE == MEMORY_INTERACTION) && INS_T == MEM_ACT) ? RF[REG_B] : RF[PC];
-wire [31:0] ram_data_out;
-wire [31:0] ram_data_in = RF[REG_A];
+assign ram_addres = ((STATE == EXECUTE || STATE == MEMORY_INTERACTION) && INS_T == MEM_ACT) ? RF[REG_B] : RF[PC];
+assign data_to_mem = RF[REG_A];
 
 reg [2:0] STATE = FETCH;
 enum bit [3:0] {NOP, CALC_CONST_A, CALC_CONST_B, CALC, MEM_ACT, HLT} EXEC_TYPE;
+enum bit [1:0] {SEL_RAM, SEL_UART} MEM_SEL_TYPE;
 
 
 wire [2:0] INS_T;
@@ -34,6 +40,24 @@ wire [5:0] REG_C = INSTR[21:17];
 wire [9:0] IMM_10 = INSTR[31:22];
 wire [14:0] IMM_15 = INSTR[31:17];
 wire [19:0] IMM_20 = INSTR[31:12];
+//non core modules selection and control
+//NOTE: MEM_OP = 0 MUST be non editing operation for any module
+wire [1:0] MEM_OP;
+wire [1:0] MEM_SEL;
+assign {MEM_SEL, MEM_OP} = INSTR[6:3] & {4{STATE == MEMORY_INTERACTION}};
+wire [3:0][31:0] MEM_VAL = {
+	32'b0,
+	32'b0,
+	uart_data_out,	//SEL_UART
+	ram_data_out	//SEL_RAM
+};
+//RAM specialisation
+assign RAM_WE = MEM_OP & (MEM_SEL == SEL_RAM);
+//UART specialisation
+assign UART_OP = MEM_OP & {2{MEM_SEL == SEL_UART}};
+
+
+
 
 wire [31:0] ALU_A;
 assign ALU_A = (INS_T == CALC_CONST_A) ? IMM_20 : RF[REG_B];
@@ -42,65 +66,52 @@ assign ALU_B = (INS_T == CALC_CONST_B) ? IMM_15 : RF[REG_C];
 wire [31:0] ALU_R;
 
 always @(posedge clk) begin
-		case(STATE)
-		   PFETCH: begin
-				RF[PC] <= RF[PC] + 12'd1;
-			   STATE <= FETCH;
-			end
-			FETCH: begin
-				INSTR <= ram_data_out;
-				STATE <= EXECUTE;
-			end
-			
-			EXECUTE: begin
-				case(INS_T)
-					NOP: STATE <= PFETCH;
-					CALC_CONST_A: begin
-						RF[REG_A] <= ALU_R;
-						STATE <= PFETCH;
-					end
-					CALC_CONST_B: begin
-						RF[REG_A] <= ALU_R;
-						STATE <= PFETCH;
-					end
-					CALC: begin
-						RF[REG_A] <= ALU_R;
-						STATE <= PFETCH;
-					end
-					MEM_ACT: begin
-						ram_we <= ALU_OP[0];
-						//RF[PC] <= RF[PC] - 12'd1;
-						STATE <= MEMORY_INTERACTION;
-					end
-					HLT: begin
+	case(STATE)
+		PFETCH: begin
+			RF[PC] <= RF[PC] + 12'd1;
+			STATE <= FETCH;
+		end
+		FETCH: begin
+			INSTR <= ram_data_out;
+			STATE <= EXECUTE;
+		end	
+		EXECUTE: begin
+			case(INS_T)
+				NOP: begin
+					STATE <= PFETCH;
+				end
+				CALC_CONST_A: begin
+					RF[REG_A] <= ALU_R;
+					STATE <= PFETCH;
+				end
+				CALC_CONST_B: begin
+					RF[REG_A] <= ALU_R;
+					STATE <= PFETCH;
+				end
+				CALC: begin
+					RF[REG_A] <= ALU_R;
+					STATE <= PFETCH;
+				end
+				MEM_ACT: begin
+					STATE <= MEMORY_INTERACTION;
+				end
+				HLT: begin
 					STATE <= HALT;
-					end
-					default: begin
-						STATE <= PFETCH;
-					end
-				endcase
-			end
-			
-			MEMORY_INTERACTION: begin
-				if (~ram_we) RF[REG_A] <= ram_data_out;
-				else ram_we <= 0;
-				STATE <= PFETCH;
-			end
-			
-			HALT: begin
-				STATE <= HALT;
-			end
-			
-		endcase
+				end
+				default: begin
+					STATE <= PFETCH;
+				end
+			endcase
+		end	
+		MEMORY_INTERACTION: begin
+			if (~RAM_WE) RF[REG_A] <= MEM_VAL[MEM_SEL];
+			STATE <= PFETCH;
+		end	
+		HALT: begin
+			STATE <= HALT;
+		end	
+	endcase
 end
-
-MEMORY RAM(
-	.address	(ram_addres),
-	.clock	(clk),
-	.data		(ram_data_in),
-	.wren		(ram_we),
-	.q			(ram_data_out)
-);
 
 
 ALU #(
