@@ -51,6 +51,12 @@ wire [3:0][31:0] MEM_VAL = {
 	uart_data_out,	//SEL_UART
 	ram_data_out	//SEL_RAM
 };
+wire [3:0] REG_WE = {
+	1'b0,
+	1'b0,
+	~(&UART_OP | (UART_OP == 2'b1)),
+	~RAM_WE	//SEL_RAM
+}
 //RAM specialisation
 assign RAM_WE = MEM_OP & (MEM_SEL == SEL_RAM);
 //UART specialisation
@@ -104,7 +110,7 @@ always @(posedge clk) begin
 			endcase
 		end	
 		MEMORY_INTERACTION: begin
-			if (~RAM_WE) RF[REG_A] <= MEM_VAL[MEM_SEL];
+			if (REG_WE[MEM_SEL]) RF[REG_A] <= MEM_VAL[MEM_SEL];
 			STATE <= PFETCH;
 		end	
 		HALT: begin
