@@ -56,7 +56,7 @@ wire [3:0] REG_WE = {
 	1'b0,
 	~(&UART_OP | (UART_OP == 2'b1)),
 	~RAM_WE	//SEL_RAM
-}
+};
 //RAM specialisation
 assign RAM_WE = MEM_OP & (MEM_SEL == SEL_RAM);
 //UART specialisation
