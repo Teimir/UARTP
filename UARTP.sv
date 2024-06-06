@@ -33,14 +33,20 @@ reg  [3:0] rx_mode = 4'd1;
 reg  [3:0] tx_mode = 4'd1;
 wire [7:0] data_from_fifo;
 wire [7:0] data_to_fifo;
-wire [31:0] uart_all_data_out = {
+wire [1:0][31:0] uart_all_data_out = {
 	{
-		tx_mode,
-		rx_mode
+		24'b0,
+		data_from_fifo
 	},
-	data_from_fifo,
-	tx_used,
-	rx_used
+	{
+		{
+			tx_mode,
+			rx_mode
+		},
+		data_from_fifo,
+		tx_used,
+		rx_used
+	}
 };
 //Подключение модуля RХ
 RX   
@@ -105,7 +111,7 @@ CORE u0(
 	.ram_addres(ram_addres),
 	.RAM_WE(RAM_WE),
 	.ram_data_out(ram_data_out),
-	.uart_data_out(uart_all_data_out),
+	.uart_data_out(uart_all_data_out[UART_OP[1]]),
 	.UART_OP(UART_OP)
 );
 
