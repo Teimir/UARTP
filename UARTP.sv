@@ -16,9 +16,12 @@ wire [7:0] data; //Данные
 wire data_tx_ready; //Сигнал, что готовы к отправке
 wire data_rx_valid; //Сигнал, что получение завершено
 
+wire full_fifo_rx; //Если заполнен буффер приёма
 wire empty_fifo_rx; //Если пустой буффер приёма
 wire full_fifo_tx; //Если заполнен буффер отправки
 wire empty_fifo_tx; //Если пустой буффер отправки
+
+
 
 wire [7:0] fifo_data; //Данные между фифо
 wire [7:0]data_rx; //Данные с рх
@@ -124,4 +127,10 @@ always @(posedge clk) begin
 	data_led[8] <= flag;
 	data_led[9] <= rx;
 end
+
+assign led = ~empty_fifo_rx;
+assign led2 = ~empty_fifo_tx;
+assign led3 = ~full_fifo_rx;
+assign led4 = ~full_fifo_tx;
+
 endmodule
