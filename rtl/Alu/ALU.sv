@@ -6,8 +6,8 @@ enum bit[3:0] {
   OP_AND,
   OP_OR,
   OP_XOR,
-  OP_RSH,
-  OP_LSH,
+  OP_SHIFT_RIGHT,	//see more types in std/utils.sv
+  OP_SHIFT_LEFT,	//see more types in std/utils.sv
   OP_CMP_GREATER,
   OP_CMP_EQUAL,
   OP_CMP_LESS,
@@ -16,6 +16,7 @@ enum bit[3:0] {
 } ALU_OPERATION;
 module ALU #(parameter bit_width = 32) (
   input wire [3:0]        OP,
+  input wire [1:0]        SHIFT_OP,
   input wire [bit_width - 1:0]  A,
   input wire [bit_width - 1:0]  B,
   input wire [bit_width - 1:0] PC,
@@ -30,9 +31,24 @@ wire [bit_width - 1:0] XOR = OR & ~AND;
 wire [bit_width:0] ADDER = (OP[0] ? A : NOT) + B;
 //wire [bit_width:0] ADDER = A + B;
 
-//сдвиги логические
-wire [bit_width - 1:0] L_SHIFT = A << 1;
-wire [bit_width - 1:0] R_SHIFT = A >> 1;
+//сдвиги
+wire [bit_width - 1:0] L_SHIFT;// = A << 1;
+wire [bit_width - 1:0] R_SHIFT;// = A >> 1;
+polyshift_l #(.word_width(bit_width)) psl (
+	.D_IN(A),
+	.C_IN('0),	//reserved (for shld & rcl)
+	.shift_size(B[$clog2(bit_width) - 1:0]),
+	.shift_type(SHIFT_OP),
+	.D_OUT(L_SHIFT)
+);
+polyshift_r #(.word_width(bit_width)) psr (
+	.D_IN(A),
+	.C_IN('0),	//reserved (for shrd & rcr)
+	.shift_size(B[$clog2(bit_width) - 1:0]),
+	.shift_type(SHIFT_OP),
+	.D_OUT(R_SHIFT)
+);
+
 //сравнение
 wire [bit_width - 1:0] CMP_GREATER = {bit_width{A > B}};
 wire [bit_width - 1:0] CMP_EQUAL = {bit_width{A == B}};
@@ -41,7 +57,7 @@ wire [bit_width - 1:0] CMP_LESS = {bit_width{A < B}};
 wire [bit_width - 1:0] OUT_T = (A == '1) ? B : PC;
 wire [bit_width - 1:0] OUT_F = (A == '0) ? B : PC;
 //вывод результата
-wire [bit_width - 1:0] RAW_R [13:0];
+wire [bit_width - 1:0] RAW_R [13:0]; 	//[15:14] - reserved
 assign RAW_R[13] = OUT_F; 
 assign RAW_R[12] = OUT_T; 
 assign RAW_R[11] = CMP_LESS; 

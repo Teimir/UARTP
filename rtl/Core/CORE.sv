@@ -27,7 +27,7 @@ assign ram_addres = ((STATE == EXECUTE || STATE == MEMORY_INTERACTION) && INS_T 
 assign data_to_mem = RF[REG_A];
 
 reg [2:0] STATE = FETCH;
-enum bit [3:0] {NOP, CALC_CONST_A, CALC_CONST_B, CALC, MEM_ACT, HLT} EXEC_TYPE;
+enum bit [2:0] {NOP, CALC_CONST_A, CALC_CONST_B, CALC, MEM_ACT, HLT, CALC_EX} EXEC_TYPE;
 enum bit [1:0] {SEL_RAM, SEL_UART} MEM_SEL_TYPE;
 
 
@@ -40,6 +40,7 @@ wire [5:0] REG_C = INSTR[21:17];
 wire [9:0] IMM_10 = INSTR[31:22];
 wire [14:0] IMM_15 = INSTR[31:17];
 wire [19:0] IMM_20 = INSTR[31:12];
+wire [1:0] SHIFT_OP = INSTR[31:30] & {2{INS_T == CALC_EX}};
 //non core modules selection and control
 //NOTE: MEM_OP = 0 MUST be non editing operation for any module
 wire [1:0] MEM_OP;
@@ -123,11 +124,12 @@ end
 ALU #(
 	.bit_width(32)
 ) ALUM(
-  .OP	(ALU_OP),
-  .A	(ALU_A),
-  .B	(ALU_B),
-  .R	(ALU_R),
-  .PC (RF[PC])
+  .OP		(ALU_OP),
+  .SHIFT_OP	(SHIFT_OP),
+  .A		(ALU_A),
+  .B		(ALU_B),
+  .R		(ALU_R),
+  .PC		(RF[PC])
 );
 
 endmodule
