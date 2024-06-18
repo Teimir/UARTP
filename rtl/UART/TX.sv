@@ -1,6 +1,6 @@
 module TX
 #(
-    parameter CLK_FREQ = 50000000
+    parameter CLK_FREQ = 100000000
 )(
     input [7:0] data_in,
     input data_valid,
@@ -46,14 +46,15 @@ always @(posedge clk) begin
         end
     endcase
 end
-
+integer i = (CLK_FREQ/9600);
 assign data_ready = (state == wait_data) ? 1 : 0;
 assign tx_line = (state != write) ? 1 : data[bit_cnt];
-assign len_bit = (mode == 4'd0) ? 32'd10417: //4800
-					  (mode == 4'd1) ? 32'd5208 : //9600
-					  (mode == 4'd2) ? 32'd434   : //115200
+assign len_bit = (mode == 4'd0) ? (CLK_FREQ/4800 + (CLK_FREQ%4800!=0)) : //4800
+					  (mode == 4'd1) ? (CLK_FREQ/9600 + (CLK_FREQ%9600!=0))  : //9600
+					  (mode == 4'd2) ? (CLK_FREQ/115200 + (CLK_FREQ%115200!=0))   : //115200
 					  //(mode == 4'd3) ? 32'd98    : //512000
-					  (mode == 4'd3) ? 32'd195    : //256000
-					  32'd5208; //9600 Default
+					  (mode == 4'd3) ? (CLK_FREQ/256000 + (CLK_FREQ%25600!=0))    : //256000
+					  (CLK_FREQ/9600 + (CLK_FREQ%9600!=0)) ; //9600 Default
+
 
 endmodule
