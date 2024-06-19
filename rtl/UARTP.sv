@@ -1,13 +1,13 @@
 module UARTP(
-	input clk_inp,
+	input clk_i,
 	input btn,
 	output led,
 	output led2,
-	output led3,
-	output led4,
+	output reg led3 = 0,
+	output reg led4 = 0,
 	output tx,
 	input rx,
-	output reg [9:0] data_led
+	output reg [9:0] data_led = 10'd0
 );
 
 
@@ -23,6 +23,19 @@ wire empty_fifo_tx; //Если пустой буффер отправки
 
 wire [7:0] fifo_data; //Данные между фифо
 wire [7:0]data_rx; //Данные с рх
+
+
+wire clk,clk2;
+
+MPLL u1(
+	.inclk0(clk_i),
+	.c0(clk2)
+);
+
+reg [31:0] ac = 32'd0;
+reg [31:0] ac2 = 32'd0;
+
+assign clk = clk2;
 
 reg flag = 0;  
 reg [1:0] sel_clk = 0;
@@ -63,7 +76,7 @@ MainCLKPLL CLPLL(
 //Подключение модуля RХ
 RX   
 #(    
-    .CLK_FREQ  (180000000)
+    .CLK_FREQ  (60000000)
 )rx_inst(
     .rx_line		(rx),
     .clk				(clk0),
@@ -85,7 +98,7 @@ Fifo_UART RX_FIFO(
 //Подключение модуля ТХ
 TX 
 #(
-    .CLK_FREQ  (180000000)
+    .CLK_FREQ  (60000000)
 )TX_inst(
     .data_in    (data),
     .data_valid (!empty_fifo_tx),
@@ -127,7 +140,15 @@ CORE u0(
 	.UART_OP(UART_OP)
 );
 
-always @(posedge clk0) begin
+always @(posedge clk) begin
+	if (ac == 32'd100000000) begin
+		led3 <= ~led3;
+		ac <= 0;
+	end
+	else begin
+		ac <= ac + 32'd1;
+	end
+
 	if (UART_OP == 2'b1) begin
 		{tx_mode, rx_mode} <= data_to_mem[7:0];
 	end
@@ -137,9 +158,24 @@ always @(posedge clk0) begin
 	data_led[9] <= rx;
 end
 
+
+
+always @(posedge clk_i) begin
+	if (ac2 == 32'd50000000) begin
+		led4 <= ~led4;
+		ac2 <= 0;
+	end
+	else begin
+		ac2 <= ac2 + 32'd1;
+	end
+end
+
+
+
 assign led = ~empty_fifo_rx;
 assign led2 = ~empty_fifo_tx;
-assign led3 = ~full_fifo_rx;
-assign led4 = ~full_fifo_tx;
+
+
+
 
 endmodule
