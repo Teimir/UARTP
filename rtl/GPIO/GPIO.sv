@@ -7,10 +7,10 @@ module GPIO#(
 	input [31:0] mode,
 	input [31:0] data,
 	input valid,
-	output reg [31:0] data_o
+	output [31:0] data_o
 );
 
-wire [31:0] data_o_wire;
+//wire [31:0] data_o_wire;
 
 reg [31:0] mode_reg = 32'h0; // 0 - read, 1 - write
 reg [31:0] data_reg = 32'd3;
@@ -20,7 +20,7 @@ always @(posedge clk)begin
 		mode_reg <= mode;
 		data_reg <= data;
 	end
-	data_o <= data_o_wire;
+	//data_o <= data_o_wire;
 end
 
 genvar i;
@@ -29,7 +29,7 @@ generate
 		alt_iobuf my_iobuf (
 				.i			(data_reg[i]),
 				.oe		(mode_reg[i]), 
-				.o			(data_o_wire[i]),
+				.o			(data_o[i]),
 				.io		(pin[i])
 		);
 	end

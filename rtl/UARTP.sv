@@ -186,9 +186,6 @@ always @(posedge clk) begin
 			gpiot_state <= 4'd4;
 		end
 		4'd4: begin
-			gpiot_state <= 4'd5;
-		end
-		4'd5: begin
 			data_gpio <= data_o;
 			valid_gpio <= 1;
 			if (data_tx_ready) gpiot_state <= 4'd0;
