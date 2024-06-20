@@ -65,7 +65,6 @@ set_location_assignment PIN_103 -to led2
 set_location_assignment PIN_104 -to led3
 set_location_assignment PIN_31 -to rx
 set_location_assignment PIN_30 -to tx
-set_location_assignment PIN_76 -to btn
 set_location_assignment PIN_105 -to led4
 set_global_assignment -name ENABLE_OCT_DONE OFF
 set_global_assignment -name USE_CONFIGURATION_DEVICE OFF
@@ -78,7 +77,6 @@ set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -
 set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to data_led[9]
 set_location_assignment PIN_119 -to data_led[0]
 set_location_assignment PIN_121 -to data_led[1]
 set_location_assignment PIN_115 -to data_led[2]
@@ -87,9 +85,6 @@ set_location_assignment PIN_129 -to data_led[4]
 set_location_assignment PIN_133 -to data_led[5]
 set_location_assignment PIN_136 -to data_led[6]
 set_location_assignment PIN_138 -to data_led[7]
-set_location_assignment PIN_142 -to data_led[8]
-set_location_assignment PIN_144 -to data_led[9]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to data_led[8]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to data_led[7]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to data_led[6]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to data_led[5]
@@ -119,5 +114,16 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/Alu/ALU.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/UARTP.sv
 set_global_assignment -name QIP_FILE rtl/clk/MPLL.qip
 set_global_assignment -name SDC_FILE sdc/main.sdc
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/GPIO/GPIO.sv
+set_location_assignment PIN_75 -to btn[1]
+set_location_assignment PIN_76 -to btn[0]
+set_location_assignment PIN_144 -to gpio[0]
+set_location_assignment PIN_142 -to gpio[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to gpio
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to gpio[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to gpio[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to btn
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to btn[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to btn[0]
 set_global_assignment -name SLD_FILE db/stp1_auto_stripped.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
