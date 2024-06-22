@@ -8,7 +8,10 @@ module CORE(
 	input wire [31:0] ram_data_out,
 	//UART
 	input wire [31:0] uart_data_out,
-	output wire [1:0] UART_OP
+	output wire [1:0] UART_OP,
+	//GPIO
+	input wire [31:0] gpio_data_out,
+	output wire [1:0] GPIO_OP
 );
 localparam PC = 5'd31;
 localparam FETCH = 3'd0;

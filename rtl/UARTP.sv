@@ -64,8 +64,16 @@ wire [1:0][31:0] uart_all_data_out = {
 		rx_used
 	}
 };
-
-
+//GPIO wires
+wire gpio_core_writes = &GPIO_OP;
+wire [31:0] gpio_data_out;
+wire gpio_valid_out;
+reg [31:0] gpio_data;
+reg is_gpio_inputing;
+wire [1:0][31:0] gpio_all_data_out = {
+	{32{~is_gpio_inputing}},
+	gpio_data
+};
 
 //Подключение модуля RХ
 RX   
@@ -96,8 +104,8 @@ TX
 #(
     .CLK_FREQ  (60000000)
 )TX_inst(
-    .data_in    (data_gpio),//(data),
-    .data_valid (valid_gpio),//(!empty_fifo_tx),
+    .data_in    (data),
+    .data_valid (!empty_fifo_tx),
     .data_ready (data_tx_ready),
     .clk        (clk),
     .tx_line    (tx),
@@ -129,6 +137,7 @@ MEMORY RAM(
 wire [31:0] data_to_mem;
 wire [12:0] ram_addres;
 wire [1:0] UART_OP;
+wire [1:0] GPIO_OP;
 CORE u0(
 	.ena(flag),
 	.clk(clk),
@@ -137,61 +146,24 @@ CORE u0(
 	.RAM_WE(RAM_WE),
 	.ram_data_out(ram_data_out),
 	.uart_data_out(uart_all_data_out[UART_OP[1]]),
-	.UART_OP(UART_OP)
+	.UART_OP(UART_OP),
+	.gpio_data_out(gpio_all_data_out[GPIO_OP[1]]),
+	.GPIO_OP(GPIO_OP)
 );
 
-reg [1:0] btn_reg = '1;
-reg flgio = 0;
-reg [31:0] mode = 32'b11;
-reg [31:0] dataio = 32'b01;
-wire [31:0] data_o;
-reg valid = 0;
-reg [3:0] gpiot_state = '0;
 
-GPIO
-#(
-	.width_pin(2)
-) u2
-(
+
+
+
+GPIO #(.width_pin($size(gpio))) u2 (
 	.clk(clk),
 	.pin(gpio),
-	.mode(mode),
-	.data(dataio),
-	.valid(valid),
-	.data_o(data_o)
+	.mode(gpio_all_data_out[1]),
+	.data(gpio_data),
+	.valid('1),
+	.data_o(gpio_data_out)
 );
 
-always @(posedge clk) begin
-		case(gpiot_state)
-		4'd0:begin
-			valid_gpio <= 0;
-			if (data_rx_valid) begin
-				mode <= data_rx;
-				gpiot_state <= 4'd1;
-			end
-		end
-		4'd1: begin
-			if (data_rx_valid) begin
-				dataio <= data_rx;
-				valid <= 1;
-				gpiot_state <= 4'd2;
-			end
-		end
-		4'd2: begin
-			valid <= 0;
-			if (&mode[7:0] == 0) gpiot_state <= 4'd3;
-			else gpiot_state <= 4'd0;
-		end
-		4'd3: begin
-			gpiot_state <= 4'd4;
-		end
-		4'd4: begin
-			data_gpio <= data_o;
-			valid_gpio <= 1;
-			if (data_tx_ready) gpiot_state <= 4'd0;
-		end
-		endcase
-end
 
 
 
@@ -211,6 +183,13 @@ always @(posedge clk) begin
 	if ((data_rx == 8'hff) && (data_rx_valid)) flag <= 1;
 	else if (flag == 1) flag <= 0;
 	if (!empty_fifo_tx && data_tx_ready) data_led <= data;
+	//GPIO clk
+	if (is_gpio_inputing | gpio_core_writes) begin
+		gpio_data <= gpio_core_writes ? gpio_data_out : data_to_mem;
+	end
+	if (GPIO_OP == 2'b01) begin
+		is_gpio_inputing = |data_to_mem;
+	end
 end
 
 assign led = ~empty_fifo_rx;
