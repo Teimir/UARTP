@@ -14,13 +14,14 @@ module CORE(
 	output wire [1:0] GPIO_OP
 );
 localparam PC = 5'd31;
-localparam FETCH = 3'd0;
+localparam FETCH = 3'd3;
 localparam EXECUTE = 3'd1;
 localparam INTERACTION = 3'd2;
-localparam HALT = 3'd3;
+localparam HALT = 3'd0;
 localparam PFETCH = 3'd4;
-reg [31:0] RF [32];
 
+
+reg [31:0] RF [32];
 initial RF[PC] = 32'd0;
 
 reg [31:0] INSTR = 32'd0;
@@ -79,6 +80,9 @@ assign ALU_B = (INS_T == CALC_CONST_B) ? IMM_15 : RF[REG_C];
 wire [31:0] ALU_R;
 reg [31:0] ALU_RES_reg;
 
+
+
+
 always @(posedge clk) begin
 	case(STATE)
 		PFETCH: begin
@@ -133,7 +137,10 @@ always @(posedge clk) begin
 			STATE <= PFETCH;
 		end	
 		HALT: begin
-			if (ena) STATE <= FETCH;
+			if (ena) begin
+			STATE <= FETCH;
+			RF[PC] = 32'd0;
+			end
 		end	
 	endcase
 end
