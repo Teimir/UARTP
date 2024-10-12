@@ -1,13 +1,14 @@
 module UARTP(
 	input clk_i,
-	input btn,
+	input [1:0] btn,
 	output led,
 	output led2,
 	output reg led3 = 0,
-	output reg led4 = 0,
+	output led4,
 	output tx,
 	input rx,
-	output reg [9:0] data_led = 10'd0
+	output reg [7:0] data_led = 10'd0,
+	inout [1:0] gpio
 );
 
 
@@ -63,8 +64,16 @@ wire [1:0][31:0] uart_all_data_out = {
 		rx_used
 	}
 };
-
-
+//GPIO wires
+wire gpio_core_writes = &GPIO_OP;
+wire [31:0] gpio_data_out;
+wire gpio_valid_out;
+reg [31:0] gpio_data;
+reg is_gpio_inputing;
+wire [1:0][31:0] gpio_all_data_out = {
+	{32{~is_gpio_inputing}},
+	gpio_data
+};
 
 //Подключение модуля RХ
 RX   
@@ -89,6 +98,8 @@ Fifo_UART RX_FIFO(
 	.usedw			(rx_used)
 );
 //Подключение модуля ТХ
+reg [7:0] data_gpio = 8'h00;
+reg valid_gpio = 0;
 TX 
 #(
     .CLK_FREQ  (60000000)
@@ -110,6 +121,8 @@ Fifo_UART TX_FIFO(
 	.q		(data),
 	.usedw	(tx_used)
 );
+
+
 //RAM
 wire [31:0] ram_data_out;
 MEMORY RAM(
@@ -119,22 +132,44 @@ MEMORY RAM(
 	.wren		(RAM_WE),
 	.q			(ram_data_out)
 );
+
 //CORE
 wire [31:0] data_to_mem;
 wire [12:0] ram_addres;
 wire [1:0] UART_OP;
+wire [1:0] GPIO_OP;
 CORE u0(
-	.clk(flag & clk),
+	.ena(flag),
+	.clk(clk),
 	.data_to_mem(data_to_mem),
 	.ram_addres(ram_addres),
 	.RAM_WE(RAM_WE),
 	.ram_data_out(ram_data_out),
 	.uart_data_out(uart_all_data_out[UART_OP[1]]),
-	.UART_OP(UART_OP)
+	.UART_OP(UART_OP),
+	.gpio_data_out(gpio_all_data_out[GPIO_OP[1]]),
+	.GPIO_OP(GPIO_OP)
 );
 
+
+
+
+
+GPIO #(.width_pin($size(gpio))) u2 (
+	.clk(clk),
+	.pin(gpio),
+	.mode(gpio_all_data_out[1]),
+	.data(gpio_data),
+	.valid('1),
+	.data_o(gpio_data_out)
+);
+
+
+
+
+
 always @(posedge clk) begin
-	if (ac == 32'd100000000) begin
+	if (ac == 32'd120000000) begin
 		led3 <= ~led3;
 		ac <= 0;
 	end
@@ -145,30 +180,19 @@ always @(posedge clk) begin
 	if (UART_OP == 2'b1) begin
 		{tx_mode, rx_mode} <= data_to_mem[7:0];
 	end
-	if (data_rx == 8'hff) flag <= 1;
-	if (!empty_fifo_tx && data_tx_ready) data_led[7:0] <= data[7:0];
-	data_led[8] <= flag;
-	data_led[9] <= rx;
-end
-
-
-
-always @(posedge clk_i) begin
-	if (ac2 == 32'd50000000) begin
-		led4 <= ~led4;
-		ac2 <= 0;
+	if ((data_rx == 8'hff) && (data_rx_valid)) flag <= 1;
+	else if (flag == 1) flag <= 0;
+	if (!empty_fifo_tx && data_tx_ready) data_led <= data;
+	//GPIO clk
+	if (is_gpio_inputing | gpio_core_writes) begin
+		gpio_data <= gpio_core_writes ? gpio_data_out : data_to_mem;
 	end
-	else begin
-		ac2 <= ac2 + 32'd1;
+	if (GPIO_OP == 2'b01) begin
+		is_gpio_inputing = |data_to_mem;
 	end
 end
-
-
 
 assign led = ~empty_fifo_rx;
 assign led2 = ~empty_fifo_tx;
-
-
-
 
 endmodule
