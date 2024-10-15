@@ -1,6 +1,6 @@
 IP Upgrade report for UARTP
-Tue Jun 18 09:39:11 2024
-Quartus Prime Version 22.1std.1 Build 917 02/14/2023 SC Lite Edition
+Sat Oct 12 20:32:38 2024
+Quartus Prime Version 23.1std.1 Build 993 05/14/2024 SC Lite Edition
 
 
 ---------------------
@@ -8,14 +8,15 @@ Quartus Prime Version 22.1std.1 Build 917 02/14/2023 SC Lite Edition
 ---------------------
   1. Legal Notice
   2. IP Upgrade Summary
-  3. IP Upgrade Messages
+  3. Successfully Upgraded IP Components
+  4. IP Upgrade Messages
 
 
 
 ----------------
 ; Legal Notice ;
 ----------------
-Copyright (C) 2023  Intel Corporation. All rights reserved.
+Copyright (C) 2024  Intel Corporation. All rights reserved.
 Your use of Intel Corporation's design tools, logic functions 
 and other software and tools, and any partner logic 
 functions, and any output files from any of the foregoing 
@@ -35,22 +36,38 @@ https://fpgasoftware.intel.com/eula.
 +-------------------------------------------------------------------------------+
 ; IP Upgrade Summary                                                            ;
 +------------------------------+------------------------------------------------+
-; IP Components Upgrade Status ; Failed - Tue Jun 18 09:39:11 2024              ;
-; Quartus Prime Version        ; 22.1std.1 Build 917 02/14/2023 SC Lite Edition ;
+; IP Components Upgrade Status ; Passed - Sat Oct 12 20:32:38 2024              ;
+; Quartus Prime Version        ; 23.1std.1 Build 993 05/14/2024 SC Lite Edition ;
 ; Revision Name                ; UARTP                                          ;
 ; Top-level Entity Name        ; UARTP                                          ;
 ; Family                       ; Cyclone IV E                                   ;
 +------------------------------+------------------------------------------------+
 
 
++------------------------------------------------------------------------------------------------------------------------------------------+
+; Successfully Upgraded IP Components                                                                                                      ;
++-------------+----------------+---------+-----------------------------+---------------------------+-----------------------------+---------+
+; Entity Name ; Component Name ; Version ; Original Source File        ; Generation File Path      ; New Source File             ; Message ;
++-------------+----------------+---------+-----------------------------+---------------------------+-----------------------------+---------+
+; Fifo_UART   ; FIFO           ; 22.1    ; rtl/UART/Fifo/Fifo_UART.qip ; rtl/UART/Fifo/Fifo_UART.v ; rtl/UART/Fifo/Fifo_UART.qip ;         ;
+; MPLL        ; ALTPLL         ; 22.1    ; rtl/clk/MPLL.qip            ; rtl/clk/MPLL.v            ; rtl/clk/MPLL.qip            ;         ;
++-------------+----------------+---------+-----------------------------+---------------------------+-----------------------------+---------+
+
+
 +---------------------+
 ; IP Upgrade Messages ;
 +---------------------+
-Info (23030): Evaluation of Tcl script d:/quatrus/quartus/common/tcl/internal/ip_regen/ip_regen.tcl was successful
+Info (11902): Backing up file "rtl/UART/Fifo/Fifo_UART.v" to "rtl/UART/Fifo/Fifo_UART.BAK.v"
+Info (11837): Started upgrading IP component FIFO with file "rtl/UART/Fifo/Fifo_UART.v"
+Info (11902): Backing up file "rtl/clk/MPLL.v" to "rtl/clk/MPLL.BAK.v"
+Info (11837): Started upgrading IP component ALTPLL with file "rtl/clk/MPLL.v"
+Info (11131): Completed upgrading IP component FIFO with file "rtl/UART/Fifo/Fifo_UART.v"
+Info (11131): Completed upgrading IP component ALTPLL with file "rtl/clk/MPLL.v"
+Info (23030): Evaluation of Tcl script c:/intelfpga_lite/23.1std/quartus/common/tcl/internal/ip_regen/ip_regen.tcl was successful
 Info: Quartus Prime Shell was successful. 0 errors, 0 warnings
-    Info: Peak virtual memory: 4875 megabytes
-    Info: Processing ended: Tue Jun 18 09:39:11 2024
-    Info: Elapsed time: 00:00:09
-    Info: Total CPU time (on all processors): 00:00:18
+    Info: Peak virtual memory: 4873 megabytes
+    Info: Processing ended: Sat Oct 12 20:32:38 2024
+    Info: Elapsed time: 00:00:20
+    Info: Total CPU time (on all processors): 00:00:10
 
 
