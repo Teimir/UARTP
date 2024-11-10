@@ -139,7 +139,7 @@ wire [12:0] ram_addres;
 wire [1:0] UART_OP;
 wire [1:0] GPIO_OP;
 wire blink;
-CORE_v2 u0(
+CORE u0(
 	.ena(flag),
 	.clk(clk),
 	.data_to_mem(data_to_mem),
@@ -150,7 +150,7 @@ CORE_v2 u0(
 	.UART_OP(UART_OP),
 	.gpio_data_out(gpio_all_data_out[GPIO_OP[1]]),
 	.GPIO_OP(GPIO_OP),
-	.blink(blink)
+	//.blink(blink)
 );
 
 
@@ -194,7 +194,7 @@ always @(posedge clk) begin
 	end
 end
 
-assign led = ~blink;
+assign led = ~empty_fifo_rx;
 assign led2 = ~empty_fifo_tx;
 
 endmodule
